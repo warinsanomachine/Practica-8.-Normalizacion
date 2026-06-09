@@ -1,1 +1,1 @@
-# Pr-ctica-8.--Normalizaci-n
+# Practica-8. -Normalizacion
