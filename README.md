@@ -1,5 +1,5 @@
-# Practica-8. -Normalizacion
-# 📊 Práctica 8: Normalización de Bases de Datos : 10]
+
+# 📊 Práctica 8: Normalización de Bases de Datos
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
