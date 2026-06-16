@@ -1,72 +1,155 @@
 import pandas as pd
 import os
 
-# 1. Crear estructura de directorios
-os.makedirs('data/normalized/dataset1', exist_ok=True)
-os.makedirs('sql/ddl', exist_ok=True)
-os.makedirs('sql/dml', exist_ok=True)
+def check_structure(df, expected_columns):
+    """1. Lectura: Validar estructura y contenido."""
+    missing_cols = [col for col in expected_columns if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Error de estructura: Faltan las columnas {missing_cols}")
+    print("Estructura validada correctamente.")
 
-# 2. Cargar datos originales
-df = pd.read_csv('data/raw/netflix_titles.csv')
+def escape_sql(val):
+    """Función auxiliar para escapar comillas simples en DML."""
+    return str(val).replace("'", "''")
 
-# Manejo de valores nulos
-df['director'] = df['director'].fillna('Unknown')
-df['cast'] = df['cast'].fillna('Unknown')
-df['country'] = df['country'].fillna('Unknown')
-df['date_added'] = df['date_added'].fillna('Unknown')
-df['rating'] = df['rating'].fillna('Unknown')
-df['duration'] = df['duration'].fillna('Unknown')
+def normalize_netflix():
+    # ==========================================
+    # REQUISITO 1: Lectura de datos originales
+    # ==========================================
+    # Cargar archivo CSV [cite: 154]
+    file_path = 'data/raw/dataset1.csv'
+    if not os.path.exists(file_path):
+        # Alternativa de nombre si se descargó directamente de Kaggle
+        file_path = 'data/raw/netflix_titles.csv' 
+        
+    print(f"Cargando {file_path}...")
+    df = pd.read_csv(file_path)
 
-# 3. Función para extraer Entidades (3FN)
-def extract_entity(df, col_name, entity_col_name):
-    # Separar por comas, apilar en una sola columna y limpiar espacios
-    s = df[col_name].str.split(',').explode().str.strip()
-    s = s[s != ""] # Eliminar vacíos
-    unique_vals = s.unique()
+    # Validar estructura
+    expected_cols = ['show_id', 'type', 'title', 'director', 'cast', 'country', 'date_added', 'release_year', 'rating', 'duration', 'listed_in']
+    check_structure(df, expected_cols)
+
+    # Manejar datos faltantes o inconsistentes 
+    df.fillna('Unknown', inplace=True)
     
-    # Crear DataFrame de la nueva tabla
-    entity_df = pd.DataFrame({entity_col_name: unique_vals})
-    entity_df.insert(0, f'{entity_col_name}_id', range(1, len(entity_df) + 1))
-    return entity_df
+    # Limpiar show_id para forzar tipo INT (PK)
+    df['show_id'] = df['show_id'].astype(str).str.replace(r'[^\d]', '', regex=True).astype(int)
 
-# Generar tablas de entidades
-directors_df = extract_entity(df, 'director', 'director_name')
-actors_df = extract_entity(df, 'cast', 'actor_name')
-countries_df = extract_entity(df, 'country', 'country_name')
-categories_df = extract_entity(df, 'listed_in', 'category_name')
-
-# Tabla principal de Títulos (Películas/Series)
-titles_df = df[['show_id', 'type', 'title', 'date_added', 'release_year', 'rating', 'duration', 'description']].copy()
-
-# 4. Función para crear Relaciones (Tablas intermedias M:N)
-def create_relation(df, col_name, entity_df, entity_col_name, title_id_col='show_id'):
-    exploded = df[[title_id_col, col_name]].copy()
-    exploded[col_name] = exploded[col_name].str.split(',')
-    exploded = exploded.explode(col_name)
-    exploded[col_name] = exploded[col_name].str.strip()
-    exploded = exploded[exploded[col_name] != ""]
+    # ==========================================
+    # REQUISITO 2 y 3: Proceso de normalización y Generación de estructura
+    # ==========================================
+    # Identificar automáticamente columnas multivaluadas [cite: 159]
+    multivalued_columns = ['director', 'cast', 'country', 'listed_in']
     
-    # Unir con la tabla de entidades para obtener el ID correspondiente
-    merged = pd.merge(exploded, entity_df, left_on=col_name, right_on=entity_col_name, how='inner')
-    relation_df = merged[[title_id_col, f'{entity_col_name}_id']].copy()
-    return relation_df
+    # Crear múltiples tablas relacionadas y definir claves [cite: 167, 168]
+    tables = {}
+    relations = {}
 
-# Generar tablas relacionales
-title_directors_df = create_relation(df, 'director', directors_df, 'director_name')
-title_actors_df = create_relation(df, 'cast', actors_df, 'actor_name')
-title_countries_df = create_relation(df, 'country', countries_df, 'country_name')
-title_categories_df = create_relation(df, 'listed_in', categories_df, 'category_name')
+    # Tabla principal (entidad central)
+    tables['Show'] = df[['show_id', 'type', 'title', 'date_added', 'release_year', 'rating', 'duration']].copy()
 
-# 5. Exportar a CSV
-titles_df.to_csv('data/normalized/dataset1/titles.csv', index=False)
-directors_df.to_csv('data/normalized/dataset1/directors.csv', index=False)
-actors_df.to_csv('data/normalized/dataset1/actors.csv', index=False)
-countries_df.to_csv('data/normalized/dataset1/countries.csv', index=False)
-categories_df.to_csv('data/normalized/dataset1/categories.csv', index=False)
+    # Dividir datos según reglas de 1FN y aplicar 3FN separando entidades [cite: 161, 163]
+    for col in multivalued_columns:
+        # Extraer valores únicos dividiendo por comas
+        exploded = df[['show_id', col]].copy()
+        exploded[col] = exploded[col].str.split(',')
+        exploded = exploded.explode(col)
+        exploded[col] = exploded[col].str.strip()
+        exploded = exploded[exploded[col] != ""]
+        
+        # Generar identificadores únicos (PKs) automáticamente para la nueva entidad 
+        unique_vals = exploded[col].unique()
+        entity_df = pd.DataFrame({f'{col}_name': unique_vals})
+        entity_df.insert(0, f'{col}_id', range(1, len(entity_df) + 1))
+        
+        # Guardar tabla de entidad (ej. Director, Actor, etc.)
+        table_name = col.capitalize()
+        tables[table_name] = entity_df
+        
+        # Crear tabla relacional (M:N) uniendo con la entidad extraída
+        merged = pd.merge(exploded, entity_df, left_on=col, right_on=f'{col}_name', how='inner')
+        relations[f'Show_{table_name}'] = merged[['show_id', f'{col}_id']].drop_duplicates()
 
-title_directors_df.to_csv('data/normalized/dataset1/title_directors.csv', index=False)
-title_actors_df.to_csv('data/normalized/dataset1/title_actors.csv', index=False)
-title_countries_df.to_csv('data/normalized/dataset1/title_countries.csv', index=False)
-title_categories_df.to_csv('data/normalized/dataset1/title_categories.csv', index=False)
+    # ==========================================
+    # REQUISITO 4: Exportación de resultados
+    # ==========================================
+    os.makedirs('data/normalized/dataset1', exist_ok=True)
+    os.makedirs('sql/ddl', exist_ok=True)
+    os.makedirs('sql/dml', exist_ok=True)
 
-print("Normalización del Dataset 1 completada y exportada con éxito.")
+    # Exportar archivos CSV separados para cada tabla [cite: 177]
+    print("Exportando CSVs normalizados...")
+    for name, tbl in tables.items():
+        tbl.to_csv(f'data/normalized/dataset1/{name.lower()}.csv', index=False)
+    for name, rel in relations.items():
+        rel.to_csv(f'data/normalized/dataset1/{name.lower()}.csv', index=False)
+
+    # Generar scripts DDL para crear las tablas y aplicar restricciones de integridad [cite: 170, 173]
+    print("Generando esquema DDL...")
+    ddl_lines = []
+    
+    ddl_lines.append("""CREATE TABLE Show (
+    show_id INT PRIMARY KEY,
+    type VARCHAR(20),
+    title VARCHAR(255),
+    date_added VARCHAR(50),
+    release_year INT,
+    rating VARCHAR(20),
+    duration VARCHAR(20)
+);""")
+
+    for col in multivalued_columns:
+        tbl_name = col.capitalize()
+        col_id = f'{col}_id'
+        
+        # DDL de la Entidad
+        ddl_lines.append(f"""CREATE TABLE {tbl_name} (
+    {col_id} INT PRIMARY KEY,
+    {col}_name VARCHAR(255)
+);""")
+        
+        # DDL de la Relación (Claves primarias compuestas y foráneas)
+        ddl_lines.append(f"""CREATE TABLE Show_{tbl_name} (
+    show_id INT,
+    {col_id} INT,
+    PRIMARY KEY (show_id, {col_id}),
+    FOREIGN KEY (show_id) REFERENCES Show(show_id),
+    FOREIGN KEY ({col_id}) REFERENCES {tbl_name}({col_id})
+);""")
+
+    with open('sql/ddl/dataset1_schema.sql', 'w', encoding='utf-8') as f:
+        f.write("\n\n".join(ddl_lines))
+
+    # Generar scripts DML para insertar datos transformados [cite: 175]
+    print("Generando scripts DML...")
+    with open('sql/dml/dataset1_data.sql', 'w', encoding='utf-8') as f:
+        
+        # Insertar entidades secundarias
+        for col in multivalued_columns:
+            tbl_name = col.capitalize()
+            f.write(f"\n-- Datos para la tabla {tbl_name}\n")
+            for _, row in tables[tbl_name].iterrows():
+                val_name = escape_sql(row[f'{col}_name'])
+                f.write(f"INSERT INTO {tbl_name} ({col}_id, {col}_name) VALUES ({row[f'{col}_id']}, '{val_name}');\n")
+                
+        # Insertar Shows
+        f.write("\n-- Datos para la tabla Show\n")
+        for _, row in tables['Show'].iterrows():
+            title = escape_sql(row['title'])
+            date_added = escape_sql(row['date_added'])
+            rating = escape_sql(row['rating'])
+            duration = escape_sql(row['duration'])
+            f.write(f"INSERT INTO Show (show_id, type, title, date_added, release_year, rating, duration) "
+                    f"VALUES ({row['show_id']}, '{row['type']}', '{title}', '{date_added}', {row['release_year']}, '{rating}', '{duration}');\n")
+            
+        # Insertar relaciones
+        for rel_name, rel_df in relations.items():
+            f.write(f"\n-- Datos para la tabla relacional {rel_name}\n")
+            col_id = [c for c in rel_df.columns if c != 'show_id'][0]
+            for _, row in rel_df.iterrows():
+                f.write(f"INSERT INTO {rel_name} (show_id, {col_id}) VALUES ({row['show_id']}, {row[col_id]});\n")
+
+    print("Proceso de normalización automatizado completado con éxito.")
+
+if __name__ == "__main__":
+    normalize_netflix()

@@ -1,25 +1,26 @@
+version: '3.8'
+
 services:
   db:
-    image: postgres:17-alpine 
-    container_name: postgres_db
+    image: postgres:17
+    container_name: db_normalizacion
     environment:
       POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: practica8_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: normalizacion_db
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./sql/ddl:/docker-entrypoint-initdb.d
 
   app:
     build: .
-    container_name: python_normalizer
-    depends_on:
-      - db
+    container_name: app_normalizacion
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: postgresql://admin:password123@db:5432/practica8_db
+    depends_on:
+      - db
 
 volumes:
   pgdata:
