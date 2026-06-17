@@ -1,7 +1,7 @@
 
 # 📊 Práctica 8: Normalización de Bases de Datos
 
-![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Python](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
@@ -37,7 +37,7 @@ A través de este proyecto se busca:
 - [x] Generación del documento comparativo que incluye el total de columnas, redundancia estimada y anomalías identificadas en cada etapa
 
 ### Ejercicio 3: Automatización del Proceso de Normalización
-- [x] Desarrollo de script de automatización utilizando Java (con JDBC)
+- [x] Desarrollo de script de automatización utilizando Python
 - [x] Lectura, validación de estructura y manejo de datos faltantes en los archivos originales
 - [x] Ejecución del proceso de transformación a 1FN, 2FN y 3FN, con generación automática de identificadores únicos (PKs)
 - [x] Exportación de los resultados mediante la generación de scripts DDL y DML para su creación e inserción en PostgreSQL
@@ -70,7 +70,7 @@ El proyecto sigue la organización requerida para el manejo de datos, scripts y 
     ├── data/ 
     │   ├── raw/                  # Datasets originales (.csv) 
     │   └── normalized/           # Datos normalizados exportados 
-    ├── scripts/                  # Scripts de automatización en Java 
+    ├── scripts/                  # Scripts de automatización en Python 
     ├── sql/ 
     │   ├── ddl/                  # Scripts de creación de tablas 
     │   └── dml/                  # Scripts de inserción de datos 
