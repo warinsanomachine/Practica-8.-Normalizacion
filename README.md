@@ -107,3 +107,5 @@ Una vez que los scripts del paso anterior hayan generado los archivos estructura
 Cuando hayas completado las pruebas, validado las consultas o extraído los diagramas Entidad-Relación desde herramientas de administración como pgAdmin, ejecuta este comando para detener los contenedores y liberar los recursos de tu computadora:
 
     docker-compose down
+### 4️⃣ Contenedor en ejecucion
+<img width="1577" height="856" loading="lazy" alt="image" src="https://github.com/user-attachments/assets/12381ed8-f868-4015-b86a-636f79acc033" />
