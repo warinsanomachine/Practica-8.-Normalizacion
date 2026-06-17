@@ -1,137 +1,174 @@
 import pandas as pd
+import numpy as np
 import os
+import psycopg2
 
-def check_structure(df, expected_columns):
-    """1. Lectura: Validar estructura y contenido."""
-    missing_cols = [col for col in expected_columns if col not in df.columns]
-    if missing_cols:
-        raise ValueError(f"Error de estructura: Faltan las columnas {missing_cols}")
-    print("Estructura validada correctamente.")
+def inyectar_en_bd(ruta_ddl, ruta_dml):
+    try:
+        conexion = psycopg2.connect(
+            host="db_normalizacion",
+            database="normalizacion_db",
+            user="admin",
+            password="password",
+            port="5432"
+        )
+        conexion.autocommit = True
+        cursor = conexion.cursor()
 
-def escape_sql(val):
-    """Función auxiliar para escapar comillas simples en descripciones DML."""
-    if pd.isna(val):
+        with open(ruta_ddl, 'r', encoding='utf-8') as archivo_ddl:
+            cursor.execute(archivo_ddl.read())
+
+        with open(ruta_dml, 'r', encoding='utf-8') as archivo_dml:
+            cursor.execute(archivo_dml.read())
+
+        cursor.close()
+        conexion.close()
+        print("Datos inyectados exitosamente")
+    except Exception as error:
+        print(f"Error: {error}")
+
+def mapear_tipo_sql(tipo):
+    if pd.api.types.is_integer_dtype(tipo):
+        return "INT"
+    elif pd.api.types.is_float_dtype(tipo):
+        return "DECIMAL(10,4)"
+    else:
+        return "VARCHAR(255)"
+
+def escapar_sql(valor):
+    if pd.isna(valor):
         return 'Unknown'
-    return str(val).replace("'", "''")
+    return str(valor).replace("'", "''")
 
-def normalize_hospital():
-    # ==========================================
-    # REQUISITO 1: Lectura de datos originales
-    # ==========================================
-    file_path = 'data/raw/dataset3.csv'
-    if not os.path.exists(file_path):
-        file_path = 'data/raw/patient_records.csv'
-        
-    print(f"Cargando {file_path}...")
-    df = pd.read_csv(file_path)
+def normalizar_hospital_tematico():
+    ruta_archivo = 'data/raw/dataset3.csv'
+    if not os.path.exists(ruta_archivo):
+        ruta_archivo = 'data/raw/patient_records.csv'
 
-    # Validar estructura básica esperada
-    expected_cols = ['Patient_ID', 'Patient_Name', 'Age', 'Gender', 'Doctor_ID', 'Doctor_Name', 'Specialty', 'Admission_ID', 'Date_of_Admission', 'Diagnosis']
-    check_structure(df, expected_cols)
+    datos = pd.read_csv(ruta_archivo)
 
-    # Manejar datos faltantes o inconsistentes
-    df = df.dropna(subset=['Patient_ID', 'Doctor_ID', 'Admission_ID']).copy()
-    
-    # Asegurar tipos INT estrictos
-    df['Patient_ID'] = df['Patient_ID'].astype(int)
-    df['Doctor_ID'] = df['Doctor_ID'].astype(int)
-    df['Admission_ID'] = df['Admission_ID'].astype(int)
-    df['Age'] = df['Age'].fillna(0).astype(int)
-    df['Diagnosis'] = df['Diagnosis'].fillna('Unknown')
+    datos.columns = datos.columns.str.replace(r'[^a-zA-Z0-9_]', '_', regex=True)
 
-    # ==========================================
-    # REQUISITO 2 y 3: Proceso de normalización y Generación de estructura
-    # ==========================================
-    print("Aplicando transformaciones a 3FN...")
-    
-    # 1. Tabla Paciente (Evita redundancia de datos personales)
-    patients_df = df[['Patient_ID', 'Patient_Name', 'Age', 'Gender']].drop_duplicates('Patient_ID').copy()
+    datos.replace([np.inf, -np.inf], -1, inplace=True)
 
-    # 2. Tabla Medico (Evita redundancia de datos del doctor)
-    doctors_df = df[['Doctor_ID', 'Doctor_Name', 'Specialty']].drop_duplicates('Doctor_ID').copy()
+    columnas_id = ['encounter_id', 'patient_id', 'hospital_id', 'icu_id']
+    for columna in columnas_id:
+        if columna in datos.columns:
+            datos[columna] = datos[columna].fillna(0).astype(int)
 
-    # 3. Tabla Diagnostico (3FN: Extrayendo descripciones de texto repetitivas)
-    # Generar identificador único (PK) automático INT
-    unique_diagnoses = df['Diagnosis'].unique()
-    diagnoses_df = pd.DataFrame({'descripcion': unique_diagnoses})
-    diagnoses_df.insert(0, 'id_diagnostico', range(1, len(diagnoses_df) + 1))
+    for columna in datos.columns:
+        if columna not in columnas_id:
+            if pd.api.types.is_numeric_dtype(datos[columna]):
+                datos[columna] = datos[columna].fillna(0)
+                if (datos[columna] % 1 == 0).all():
+                    datos[columna] = datos[columna].astype(int)
+            else:
+                datos[columna] = datos[columna].fillna('Unknown')
+                datos[columna] = datos[columna].apply(escapar_sql)
 
-    # 4. Tabla Cita / Admision (Tabla de Hechos)
-    # Unir con el catálogo de diagnósticos para obtener el ID numérico
-    merged_df = pd.merge(df, diagnoses_df, left_on='Diagnosis', right_on='descripcion', how='inner')
-    admissions_df = merged_df[['Admission_ID', 'Patient_ID', 'Doctor_ID', 'id_diagnostico', 'Date_of_Admission']].drop_duplicates('Admission_ID').copy()
+    hospitales_df = datos[['hospital_id']].drop_duplicates('hospital_id').copy()
 
-    # ==========================================
-    # REQUISITO 4: Exportación de resultados
-    # ==========================================
+    columnas_paciente = [c for c in ['patient_id', 'age', 'gender', 'ethnicity', 'bmi', 'height', 'weight'] if c in datos.columns]
+    pacientes_df = datos[columnas_paciente].drop_duplicates('patient_id').copy()
+
+    columnas_uci = [c for c in ['icu_id', 'icu_type', 'icu_stay_type', 'icu_admit_source'] if c in datos.columns]
+    uci_df = datos[columnas_uci].drop_duplicates('icu_id').copy()
+
+    usadas = set(columnas_paciente + columnas_uci + ['hospital_id', 'encounter_id', 'hospital_death', 'pre_icu_los_days'])
+
+    columnas_apache = [c for c in datos.columns if 'apache' in c.lower() and c not in usadas]
+    apache_df = datos[['encounter_id'] + columnas_apache].copy()
+    usadas.update(columnas_apache)
+
+    lista_comorbilidades = ['aids', 'cirrhosis', 'diabetes_mellitus', 'hepatic_failure', 'immunosuppression', 'leukemia', 'lymphoma', 'solid_tumor_with_metastasis']
+    columnas_comorb = [c for c in lista_comorbilidades if c in datos.columns and c not in usadas]
+    comorb_df = datos[['encounter_id'] + columnas_comorb].copy()
+    usadas.update(columnas_comorb)
+
+    patrones_vitales = ['bp', 'heartrate', 'temp', 'resprate', 'spo2']
+    columnas_vitales = [c for c in datos.columns if any(v in c.lower() for v in patrones_vitales) and c not in usadas]
+    vitales_df = datos[['encounter_id'] + columnas_vitales].copy()
+    usadas.update(columnas_vitales)
+
+    columnas_labs = [c for c in datos.columns if c not in usadas]
+    labs_df = datos[['encounter_id'] + columnas_labs].copy()
+
+    encuentros_df = datos[['encounter_id', 'patient_id', 'hospital_id', 'icu_id', 'hospital_death']].drop_duplicates('encounter_id').copy()
+
     os.makedirs('data/normalized/dataset3', exist_ok=True)
     os.makedirs('sql/ddl', exist_ok=True)
     os.makedirs('sql/dml', exist_ok=True)
 
-    print("Exportando CSVs normalizados...")
-    patients_df.to_csv('data/normalized/dataset3/pacientes.csv', index=False)
-    doctors_df.to_csv('data/normalized/dataset3/medicos.csv', index=False)
-    diagnoses_df.to_csv('data/normalized/dataset3/diagnosticos.csv', index=False)
-    admissions_df.to_csv('data/normalized/dataset3/citas.csv', index=False)
+    hospitales_df.to_csv('data/normalized/dataset3/hospitales.csv', index=False)
+    pacientes_df.to_csv('data/normalized/dataset3/pacientes.csv', index=False)
+    uci_df.to_csv('data/normalized/dataset3/unidades_uci.csv', index=False)
+    encuentros_df.to_csv('data/normalized/dataset3/encuentros.csv', index=False)
+    apache_df.to_csv('data/normalized/dataset3/apache_scores.csv', index=False)
+    comorb_df.to_csv('data/normalized/dataset3/comorbilidades.csv', index=False)
+    vitales_df.to_csv('data/normalized/dataset3/signos_vitales.csv', index=False)
+    if not labs_df.empty and len(labs_df.columns) > 1:
+        labs_df.to_csv('data/normalized/dataset3/laboratorios.csv', index=False)
 
-    print("Generando esquema DDL...")
-    ddl_script = """CREATE TABLE Paciente (
-    Patient_ID INT PRIMARY KEY,
-    Patient_Name VARCHAR(150),
-    Age INT,
-    Gender VARCHAR(20)
-);
+    def generar_tabla(nombre_tabla, tabla_df, pk, fks=None):
+        if tabla_df.empty or len(tabla_df.columns) <= 1 and nombre_tabla != 'Hospital': return ""
+        lineas = [f"CREATE TABLE {nombre_tabla} ("]
+        for col in tabla_df.columns:
+            tipo_sql = mapear_tipo_sql(tabla_df[col].dtype)
+            linea = f"    {col} {tipo_sql}"
+            if col == pk:
+                linea += " PRIMARY KEY"
+            lineas.append(linea + ",")
+        if fks:
+            for fk_col, ref_tabla, ref_pk in fks:
+                lineas.append(f"    FOREIGN KEY ({fk_col}) REFERENCES {ref_tabla}({ref_pk}),")
+        lineas[-1] = lineas[-1].rstrip(',')
+        lineas.append(");\n")
+        return "\n".join(lineas)
 
-CREATE TABLE Medico (
-    Doctor_ID INT PRIMARY KEY,
-    Doctor_Name VARCHAR(150),
-    Specialty VARCHAR(100)
-);
+    script_ddl = "DROP TABLE IF EXISTS Laboratorios CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Signos_Vitales CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Comorbilidades CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Apache_Scores CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Encuentro CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Unidad_UCI CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Paciente CASCADE;\n"
+    script_ddl += "DROP TABLE IF EXISTS Hospital CASCADE;\n\n"
 
-CREATE TABLE Diagnostico (
-    id_diagnostico INT PRIMARY KEY,
-    descripcion VARCHAR(255)
-);
+    script_ddl += generar_tabla('Hospital', hospitales_df, 'hospital_id') + "\n"
+    script_ddl += generar_tabla('Paciente', pacientes_df, 'patient_id') + "\n"
+    script_ddl += generar_tabla('Unidad_UCI', uci_df, 'icu_id') + "\n"
 
-CREATE TABLE Cita (
-    Admission_ID INT PRIMARY KEY,
-    Patient_ID INT,
-    Doctor_ID INT,
-    id_diagnostico INT,
-    Date_of_Admission DATE,
-    FOREIGN KEY (Patient_ID) REFERENCES Paciente(Patient_ID),
-    FOREIGN KEY (Doctor_ID) REFERENCES Medico(Doctor_ID),
-    FOREIGN KEY (id_diagnostico) REFERENCES Diagnostico(id_diagnostico)
-);"""
+    fks_encuentro = [('patient_id', 'Paciente', 'patient_id'), ('hospital_id', 'Hospital', 'hospital_id'), ('icu_id', 'Unidad_UCI', 'icu_id')]
+    script_ddl += generar_tabla('Encuentro', encuentros_df, 'encounter_id', fks_encuentro) + "\n"
 
-    with open('sql/ddl/dataset3_schema.sql', 'w', encoding='utf-8') as f:
-        f.write(ddl_script)
+    fks_satelite = [('encounter_id', 'Encuentro', 'encounter_id')]
+    script_ddl += generar_tabla('Apache_Scores', apache_df, 'encounter_id', fks_satelite) + "\n"
+    script_ddl += generar_tabla('Comorbilidades', comorb_df, 'encounter_id', fks_satelite) + "\n"
+    script_ddl += generar_tabla('Signos_Vitales', vitales_df, 'encounter_id', fks_satelite) + "\n"
+    if not labs_df.empty and len(labs_df.columns) > 1:
+        script_ddl += generar_tabla('Laboratorios', labs_df, 'encounter_id', fks_satelite) + "\n"
 
-    print("Generando scripts DML de inserción...")
-    with open('sql/dml/dataset3_data.sql', 'w', encoding='utf-8') as f:
-        
-        f.write("-- Poblado de la tabla Diagnostico\n")
-        for _, row in diagnoses_df.iterrows():
-            desc = escape_sql(row['descripcion'])
-            f.write(f"INSERT INTO Diagnostico (id_diagnostico, descripcion) VALUES ({row['id_diagnostico']}, '{desc}');\n")
-            
-        f.write("\n-- Poblado de la tabla Medico\n")
-        for _, row in doctors_df.iterrows():
-            name = escape_sql(row['Doctor_Name'])
-            spec = escape_sql(row['Specialty'])
-            f.write(f"INSERT INTO Medico (Doctor_ID, Doctor_Name, Specialty) VALUES ({row['Doctor_ID']}, '{name}', '{spec}');\n")
-            
-        f.write("\n-- Poblado de la tabla Paciente\n")
-        for _, row in patients_df.iterrows():
-            name = escape_sql(row['Patient_Name'])
-            gender = escape_sql(row['Gender'])
-            f.write(f"INSERT INTO Paciente (Patient_ID, Patient_Name, Age, Gender) VALUES ({row['Patient_ID']}, '{name}', {row['Age']}, '{gender}');\n")
-            
-        f.write("\n-- Poblado de la tabla Cita\n")
-        for _, row in admissions_df.iterrows():
-            f.write(f"INSERT INTO Cita (Admission_ID, Patient_ID, Doctor_ID, id_diagnostico, Date_of_Admission) VALUES ({row['Admission_ID']}, {row['Patient_ID']}, {row['Doctor_ID']}, {row['id_diagnostico']}, '{row['Date_of_Admission']}');\n")
+    with open('sql/ddl/dataset3_schema.sql', 'w', encoding='utf-8') as archivo_ddl:
+        archivo_ddl.write(script_ddl)
 
-    print("Proceso de normalización automatizado para Dataset 3 completado con éxito.")
+    def generar_inserciones(nombre_tabla, tabla_df, archivo):
+        if tabla_df.empty or len(tabla_df.columns) <= 1 and nombre_tabla != 'Hospital': return
+        cols = ", ".join(tabla_df.columns)
+        for fila in tabla_df.itertuples(index=False, name=None):
+            valores = [f"'{v}'" if isinstance(v, str) else str(v) for v in fila]
+            archivo.write(f"INSERT INTO {nombre_tabla} ({cols}) VALUES ({', '.join(valores)});\n")
+
+    with open('sql/dml/dataset3_data.sql', 'w', encoding='utf-8') as archivo_dml:
+        generar_inserciones('Hospital', hospitales_df, archivo_dml)
+        generar_inserciones('Paciente', pacientes_df, archivo_dml)
+        generar_inserciones('Unidad_UCI', uci_df, archivo_dml)
+        generar_inserciones('Encuentro', encuentros_df, archivo_dml)
+        generar_inserciones('Apache_Scores', apache_df, archivo_dml)
+        generar_inserciones('Comorbilidades', comorb_df, archivo_dml)
+        generar_inserciones('Signos_Vitales', vitales_df, archivo_dml)
+        generar_inserciones('Laboratorios', labs_df, archivo_dml)
+
+    inyectar_en_bd('sql/ddl/dataset3_schema.sql', 'sql/dml/dataset3_data.sql')
 
 if __name__ == "__main__":
-    normalize_hospital()
+    normalizar_hospital_tematico()
