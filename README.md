@@ -96,16 +96,10 @@ Estos comandos corren los scripts de Python dentro del contenedor de la aplicaci
     docker-compose run --rm app python scripts/normalize_dataset1.py
     docker-compose run --rm app python scripts/normalize_dataset2.py
     docker-compose run --rm app python scripts/normalize_dataset3.py
-### 3️⃣ Inserción de Datos (Poblado de la Base de Datos)
-Una vez que los scripts del paso anterior hayan generado los archivos estructurados .sql, utiliza los siguientes comandos para inyectar los esquemas y poblar las tablas directamente en el contenedor de PostgreSQL:
-
-    docker exec -i db_normalizacion psql -U admin -d normalizacion_db < sql/dml/dataset1_data.sql
-    docker exec -i db_normalizacion psql -U admin -d normalizacion_db < sql/dml/dataset2_data.sql
-    docker exec -i db_normalizacion psql -U admin -d normalizacion_db < sql/dml/dataset3_data.sql
-
-### 4️⃣ Apagar el Proyecto
+    
+### 3️⃣ Apagar el Proyecto
 Cuando hayas completado las pruebas, validado las consultas o extraído los diagramas Entidad-Relación desde herramientas de administración como pgAdmin, ejecuta este comando para detener los contenedores y liberar los recursos de tu computadora:
 
     docker-compose down
-### 4️⃣ Contenedor en ejecucion
+### 5 Contenedor en ejecucion
 <img width="1577" height="856" loading="lazy" alt="image" src="https://github.com/user-attachments/assets/12381ed8-f868-4015-b86a-636f79acc033" />
