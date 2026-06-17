@@ -1,0 +1,242 @@
+icu_id,icu_type,icu_stay_type,icu_admit_source
+92,CTICU,admit,Floor
+90,Med-Surg ICU,admit,Floor
+93,Med-Surg ICU,admit,Accident & Emergency
+91,Med-Surg ICU,admit,Accident & Emergency
+95,Med-Surg ICU,admit,Accident & Emergency
+114,CCU-CTICU,admit,Other Hospital
+113,Med-Surg ICU,admit,Operating Room / Recovery
+102,Neuro ICU,admit,Accident & Emergency
+97,MICU,admit,Operating Room / Recovery
+100,Neuro ICU,admit,Accident & Emergency
+87,Med-Surg ICU,admit,Accident & Emergency
+99,Med-Surg ICU,admit,Accident & Emergency
+103,SICU,admit,Accident & Emergency
+83,Med-Surg ICU,admit,Accident & Emergency
+85,SICU,admit,Operating Room / Recovery
+109,Med-Surg ICU,admit,Floor
+82,Med-Surg ICU,admit,Accident & Emergency
+98,Med-Surg ICU,admit,Accident & Emergency
+89,Neuro ICU,admit,Other Hospital
+108,Med-Surg ICU,admit,Floor
+120,Med-Surg ICU,admit,Operating Room / Recovery
+143,Med-Surg ICU,admit,Accident & Emergency
+133,Med-Surg ICU,admit,Operating Room / Recovery
+136,Med-Surg ICU,admit,Accident & Emergency
+160,Med-Surg ICU,admit,Accident & Emergency
+126,Med-Surg ICU,admit,Accident & Emergency
+170,Med-Surg ICU,admit,Accident & Emergency
+144,Med-Surg ICU,admit,Accident & Emergency
+123,Med-Surg ICU,admit,Floor
+171,Med-Surg ICU,admit,Accident & Emergency
+125,Med-Surg ICU,admit,Floor
+135,Med-Surg ICU,admit,Accident & Emergency
+153,Med-Surg ICU,admit,Accident & Emergency
+158,Med-Surg ICU,admit,Accident & Emergency
+134,Med-Surg ICU,admit,Floor
+251,Med-Surg ICU,admit,Operating Room / Recovery
+212,Cardiac ICU,admit,Floor
+185,CCU-CTICU,admit,Floor
+174,Med-Surg ICU,admit,Accident & Emergency
+236,Med-Surg ICU,admit,Floor
+252,Med-Surg ICU,admit,Floor
+181,CTICU,admit,Operating Room / Recovery
+176,Med-Surg ICU,admit,Accident & Emergency
+248,Med-Surg ICU,admit,Accident & Emergency
+227,Med-Surg ICU,admit,Accident & Emergency
+195,Med-Surg ICU,admit,Accident & Emergency
+187,Med-Surg ICU,admit,Accident & Emergency
+230,Med-Surg ICU,admit,Accident & Emergency
+242,Med-Surg ICU,admit,Accident & Emergency
+241,Med-Surg ICU,admit,Accident & Emergency
+267,Med-Surg ICU,admit,Accident & Emergency
+259,Med-Surg ICU,admit,Accident & Emergency
+290,Med-Surg ICU,readmit,Operating Room / Recovery
+273,Neuro ICU,admit,Operating Room / Recovery
+261,Med-Surg ICU,admit,Floor
+307,Med-Surg ICU,admit,Accident & Emergency
+285,CTICU,admit,Accident & Emergency
+286,Cardiac ICU,admit,Accident & Emergency
+256,Med-Surg ICU,admit,Floor
+302,Med-Surg ICU,admit,Accident & Emergency
+417,Med-Surg ICU,admit,Operating Room / Recovery
+337,Med-Surg ICU,admit,Accident & Emergency
+404,CSICU,admit,Operating Room / Recovery
+408,CSICU,admit,Operating Room / Recovery
+377,Med-Surg ICU,admit,Operating Room / Recovery
+394,Med-Surg ICU,admit,Operating Room / Recovery
+347,MICU,admit,Floor
+369,Med-Surg ICU,admit,Accident & Emergency
+376,Med-Surg ICU,admit,Accident & Emergency
+362,Med-Surg ICU,admit,Operating Room / Recovery
+374,Med-Surg ICU,admit,Accident & Emergency
+413,Med-Surg ICU,admit,Accident & Emergency
+384,CSICU,admit,Floor
+391,CSICU,admit,Operating Room / Recovery
+317,Med-Surg ICU,admit,Accident & Emergency
+324,Neuro ICU,admit,Accident & Emergency
+402,CSICU,admit,Operating Room / Recovery
+388,Med-Surg ICU,admit,Accident & Emergency
+335,Med-Surg ICU,admit,Accident & Emergency
+386,Med-Surg ICU,admit,Accident & Emergency
+364,Med-Surg ICU,admit,Accident & Emergency
+321,Med-Surg ICU,admit,Accident & Emergency
+366,Med-Surg ICU,admit,Operating Room / Recovery
+312,Med-Surg ICU,admit,Accident & Emergency
+400,Med-Surg ICU,admit,Operating Room / Recovery
+398,MICU,admit,Floor
+365,Med-Surg ICU,admit,Floor
+338,Med-Surg ICU,admit,Floor
+389,Med-Surg ICU,admit,Accident & Emergency
+429,Cardiac ICU,admit,Accident & Emergency
+428,Med-Surg ICU,admit,Accident & Emergency
+426,Neuro ICU,admit,Operating Room / Recovery
+430,Med-Surg ICU,admit,Floor
+424,Med-Surg ICU,admit,Accident & Emergency
+427,Med-Surg ICU,admit,Unknown
+431,CSICU,admit,Operating Room / Recovery
+432,Med-Surg ICU,admit,Accident & Emergency
+425,Cardiac ICU,admit,Floor
+434,MICU,admit,Other Hospital
+451,Neuro ICU,admit,Accident & Emergency
+464,CCU-CTICU,admit,Operating Room / Recovery
+445,Med-Surg ICU,admit,Accident & Emergency
+470,Med-Surg ICU,admit,Accident & Emergency
+477,Cardiac ICU,admit,Floor
+467,CTICU,admit,Floor
+482,MICU,admit,Accident & Emergency
+471,CTICU,admit,Accident & Emergency
+480,SICU,admit,Accident & Emergency
+468,CTICU,admit,Floor
+479,CTICU,admit,Operating Room / Recovery
+481,MICU,admit,Accident & Emergency
+474,SICU,admit,Accident & Emergency
+491,Med-Surg ICU,admit,Floor
+498,Med-Surg ICU,admit,Operating Room / Recovery
+483,Med-Surg ICU,admit,Accident & Emergency
+486,Med-Surg ICU,admit,Accident & Emergency
+489,Med-Surg ICU,admit,Floor
+490,Med-Surg ICU,admit,Floor
+495,Med-Surg ICU,admit,Operating Room / Recovery
+499,Med-Surg ICU,admit,Accident & Emergency
+493,Med-Surg ICU,admit,Accident & Emergency
+487,MICU,admit,Accident & Emergency
+497,Med-Surg ICU,admit,Floor
+494,Med-Surg ICU,admit,Accident & Emergency
+504,SICU,admit,Accident & Emergency
+512,CCU-CTICU,admit,Floor
+508,Med-Surg ICU,admit,Accident & Emergency
+514,Med-Surg ICU,admit,Floor
+505,Med-Surg ICU,admit,Accident & Emergency
+513,MICU,admit,Floor
+506,MICU,admit,Operating Room / Recovery
+523,Med-Surg ICU,admit,Accident & Emergency
+516,Med-Surg ICU,admit,Accident & Emergency
+543,Med-Surg ICU,admit,Accident & Emergency
+538,Med-Surg ICU,admit,Floor
+517,CCU-CTICU,admit,Accident & Emergency
+534,CTICU,admit,Operating Room / Recovery
+547,Med-Surg ICU,admit,Accident & Emergency
+531,Cardiac ICU,admit,Accident & Emergency
+550,Neuro ICU,admit,Accident & Emergency
+549,CTICU,admit,Floor
+561,Med-Surg ICU,admit,Accident & Emergency
+556,Med-Surg ICU,admit,Floor
+559,Med-Surg ICU,admit,Accident & Emergency
+552,Cardiac ICU,admit,Accident & Emergency
+608,Med-Surg ICU,admit,Accident & Emergency
+597,Med-Surg ICU,admit,Accident & Emergency
+601,MICU,admit,Accident & Emergency
+609,SICU,admit,Floor
+602,Med-Surg ICU,admit,Operating Room / Recovery
+594,Neuro ICU,admit,Accident & Emergency
+607,Cardiac ICU,admit,Accident & Emergency
+603,Med-Surg ICU,admit,Accident & Emergency
+622,CCU-CTICU,admit,Accident & Emergency
+626,Cardiac ICU,admit,Accident & Emergency
+611,SICU,admit,Operating Room / Recovery
+628,MICU,admit,Operating Room / Recovery
+616,Neuro ICU,admit,Accident & Emergency
+623,Neuro ICU,admit,Accident & Emergency
+613,Med-Surg ICU,admit,Floor
+619,CCU-CTICU,admit,Accident & Emergency
+620,Med-Surg ICU,admit,Accident & Emergency
+625,Med-Surg ICU,admit,Accident & Emergency
+646,Neuro ICU,admit,Accident & Emergency
+653,Med-Surg ICU,admit,Accident & Emergency
+656,Med-Surg ICU,admit,Accident & Emergency
+657,CCU-CTICU,admit,Accident & Emergency
+669,Med-Surg ICU,admit,Accident & Emergency
+647,Med-Surg ICU,admit,Floor
+642,Med-Surg ICU,admit,Accident & Emergency
+664,SICU,admit,Accident & Emergency
+632,Cardiac ICU,admit,Accident & Emergency
+666,Med-Surg ICU,admit,Floor
+650,Cardiac ICU,admit,Accident & Emergency
+634,CTICU,admit,Accident & Emergency
+636,SICU,admit,Accident & Emergency
+641,Med-Surg ICU,admit,Accident & Emergency
+654,MICU,admit,Accident & Emergency
+711,CCU-CTICU,admit,Accident & Emergency
+709,Med-Surg ICU,admit,Operating Room / Recovery
+675,SICU,admit,Operating Room / Recovery
+697,SICU,admit,Operating Room / Recovery
+683,Med-Surg ICU,admit,Accident & Emergency
+696,Med-Surg ICU,admit,Accident & Emergency
+707,Med-Surg ICU,admit,Accident & Emergency
+687,Med-Surg ICU,admit,Accident & Emergency
+700,MICU,admit,Accident & Emergency
+694,Med-Surg ICU,admit,Accident & Emergency
+678,MICU,admit,Other Hospital
+708,Med-Surg ICU,admit,Accident & Emergency
+685,Med-Surg ICU,admit,Accident & Emergency
+684,Cardiac ICU,admit,Operating Room / Recovery
+705,Med-Surg ICU,admit,Accident & Emergency
+679,Neuro ICU,admit,Operating Room / Recovery
+698,MICU,admit,Floor
+677,Med-Surg ICU,admit,Floor
+680,Med-Surg ICU,admit,Floor
+775,Med-Surg ICU,admit,Accident & Emergency
+766,Med-Surg ICU,admit,Accident & Emergency
+804,Med-Surg ICU,transfer,Floor
+814,Med-Surg ICU,admit,Accident & Emergency
+836,Med-Surg ICU,admit,Operating Room / Recovery
+829,Med-Surg ICU,transfer,Floor
+809,CSICU,admit,Operating Room / Recovery
+822,Med-Surg ICU,transfer,Operating Room / Recovery
+794,CTICU,admit,Accident & Emergency
+798,Med-Surg ICU,admit,Accident & Emergency
+831,Med-Surg ICU,transfer,Floor
+830,Med-Surg ICU,admit,Accident & Emergency
+772,Med-Surg ICU,transfer,Floor
+832,Med-Surg ICU,admit,Accident & Emergency
+780,Med-Surg ICU,admit,Accident & Emergency
+786,Cardiac ICU,admit,Accident & Emergency
+823,Med-Surg ICU,admit,Floor
+855,CCU-CTICU,admit,Accident & Emergency
+876,Med-Surg ICU,admit,Accident & Emergency
+888,Med-Surg ICU,admit,Accident & Emergency
+874,Med-Surg ICU,admit,Accident & Emergency
+895,Med-Surg ICU,transfer,Floor
+840,MICU,transfer,Accident & Emergency
+889,Neuro ICU,admit,Accident & Emergency
+841,SICU,admit,Operating Room / Recovery
+878,Med-Surg ICU,admit,Floor
+862,Cardiac ICU,admit,Accident & Emergency
+869,Med-Surg ICU,transfer,Accident & Emergency
+852,Med-Surg ICU,admit,Accident & Emergency
+904,Med-Surg ICU,admit,Accident & Emergency
+905,Med-Surg ICU,admit,Accident & Emergency
+903,Med-Surg ICU,admit,Floor
+927,Cardiac ICU,admit,Accident & Emergency
+921,Med-Surg ICU,admit,Accident & Emergency
+907,Med-Surg ICU,admit,Accident & Emergency
+926,Med-Surg ICU,admit,Accident & Emergency
+906,Neuro ICU,admit,Accident & Emergency
+925,Med-Surg ICU,admit,Accident & Emergency
+908,Med-Surg ICU,admit,Floor
+917,Med-Surg ICU,admit,Accident & Emergency
+915,Med-Surg ICU,admit,Accident & Emergency
+918,Med-Surg ICU,admit,Operating Room / Recovery
+909,Med-Surg ICU,admit,Accident & Emergency
+922,Med-Surg ICU,admit,Accident & Emergency
