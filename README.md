@@ -53,15 +53,16 @@ A través de este proyecto se busca:
 
 ---
 
-## ⚙️ Instrucciones de Ejecución
+## ⚡ Inicio Rápido
 
-Para desplegar y ejecutar el proyecto localmente utilizando Docker, sigue estos pasos:
+Para levantar el proyecto de forma básica:
 
 1. Clona este repositorio en tu entorno local.
-2. Navega a la raíz del directorio `normalizacion-db/`.
-3. Ejecuta el siguiente comando en tu terminal para levantar los contenedores en segundo plano:
+2. Navega a la raíz del proyecto.
+3. Ejecuta el siguiente comando para levantar los contenedores en segundo plano:
    ```bash
    docker-compose up -d
+   ```
 
 ## 📂 Estructura del Proyecto
 El proyecto sigue la organización requerida para el manejo de datos, scripts y documentación:
@@ -101,5 +102,49 @@ Estos comandos corren los scripts de Python dentro del contenedor de la aplicaci
 Cuando hayas completado las pruebas, validado las consultas o extraído los diagramas Entidad-Relación desde herramientas de administración como pgAdmin, ejecuta este comando para detener los contenedores y liberar los recursos de tu computadora:
 
     docker-compose down
-### 4 Contenedor en ejecucion
+### 4️⃣ Contenedor en Ejecución
 <img width="1577" height="856" loading="lazy" alt="image" src="https://github.com/user-attachments/assets/12381ed8-f868-4015-b86a-636f79acc033" />
+
+---
+
+## 🖥️ Administración y Visualización con pgAdmin 4
+
+Para conectarte a la base de datos PostgreSQL de Docker, ver los datos de las tablas normalizadas y generar su diagrama de relaciones (ERD) en pgAdmin 4, sigue las siguientes instrucciones:
+
+### 🔌 1. Conexión a la Base de Datos
+1. Abre **pgAdmin 4** en tu computadora.
+2. Haz clic derecho sobre **Servers** en el panel de navegación izquierdo y selecciona **Register** ➡️ **Server...**
+3. En la pestaña **General**, ingresa un nombre para identificar la conexión (por ejemplo: `Práctica Normalización`).
+4. Ve a la pestaña **Connection** e ingresa la siguiente configuración (tomada de [docker-compose.yml](file:///c:/Users/flin1/OneDrive/Documentos/GitHub/Practica-8.-Normalizacion/docker-compose.yml)):
+   - **Host name/address:** `localhost`
+   - **Port:** `5432`
+   - **Maintenance database:** `normalizacion_db`
+   - **Username:** `admin`
+   - **Password:** `password` *(puedes activar la casilla "Save password" para guardarla)*.
+5. Haz clic en **Save**.
+
+---
+
+### 📊 2. Visualización de las Tablas e Información
+Una vez que te hayas conectado con éxito:
+1. En el menú de navegación izquierdo, despliega la ruta:
+   `Servers` ➡️ `Práctica Normalización` ➡️ `Databases` ➡️ `normalizacion_db` ➡️ `Schemas` ➡️ `public` ➡️ `Tables`.
+2. Aquí verás listadas todas las tablas resultantes del proceso de normalización (como `show`, `actor`, `show_actor`, etc.).
+3. **Ver filas y datos rápidamente:**
+   - Haz clic derecho sobre cualquier tabla.
+   - Selecciona **View/Edit Data** ➡️ **All Rows** (o *First 100 Rows*).
+   - Se abrirá una cuadrícula interactiva con la información guardada en la tabla.
+4. **Consultas personalizadas con Query Tool:**
+   - Selecciona la base de datos `normalizacion_db` o el esquema `public`.
+   - Haz clic en el botón de **Query Tool** (icono de base de datos con un rayo) en la barra superior.
+   - Escribe una consulta SQL en el panel (por ejemplo: `SELECT * FROM show;`).
+   - Presiona la tecla **F5** o haz clic en el botón de reproducir (▶️) para ejecutar la consulta y visualizar los resultados en la parte inferior.
+
+---
+
+### 🗺️ 3. Visualización del Diagrama Relacional (ERD)
+pgAdmin 4 incluye una funcionalidad integrada para generar y estructurar automáticamente los diagramas Entidad-Relación de tus bases de datos:
+1. En el panel izquierdo de navegación, despliega la base de datos hasta llegar al esquema **public** (`normalizacion_db` ➡️ `Schemas` ➡️ `public`).
+2. Haz clic derecho sobre **public** y selecciona **Generate ERD** (o **ERD Tool** dependiendo de tu versión de pgAdmin).
+3. pgAdmin analizará todas las llaves primarias (PK) y llaves foráneas (FK) que conectan las tablas y generará automáticamente un diagrama entidad-relación interactivo.
+4. Podrás mover las tablas en el lienzo para organizarlas como prefieras, y exportar el diagrama como una imagen utilizando el botón de guardado/cámara en la barra de herramientas del ERD.
